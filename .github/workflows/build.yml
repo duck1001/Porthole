@@ -1,0 +1,46 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  roothide:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          set -e
+          export THEOS=$HOME/theos
+          git clone --recursive --depth 1 https://github.com/roothide/theos "$THEOS"
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
+          echo "$THEOS/bin" >> $GITHUB_PATH
+
+      - name: Install iOS SDK 16.5
+        run: |
+          set -e
+          cd "$HOME"
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git sdks
+          cd sdks
+          git sparse-checkout set iPhoneOS16.5.sdk
+          mv iPhoneOS16.5.sdk "$THEOS/sdks/"
+
+      - name: Build roothide package
+        run: |
+          set -e
+          make clean || true
+          make package THEOS_PACKAGE_SCHEME=roothide ARCHS="arm64 arm64e" FINALPACKAGE=1
+
+      - name: Collect deb
+        run: |
+          mkdir -p out
+          find packages -name '*.deb' -exec cp {} out/ \;
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Porthole-roothide
+          path: out/*.deb
