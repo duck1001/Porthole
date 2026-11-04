@@ -3,6 +3,7 @@
 //
 
 #import "PHLog.h"
+#import "PHCommon.h"
 
 static NSString *gLogPath = nil;
 static NSLock *gLogLock = nil;
