@@ -107,11 +107,29 @@ typedef NS_ENUM(NSInteger, PHRowType) {
     return self;
 }
 
-// PreferenceLoader 可能按 PSListController 的接口调用，这里做兼容空实现
+// PreferenceLoader / PSListController 会按自己的接口往 detail 控制器上发消息，
+// 这里把它们可能用到的入口全部实现成安全空实现，避免 doesNotRecognizeSelector 崩溃。
 - (void)setSpecifier:(id)specifier {}
 - (id)specifier { return nil; }
+- (void)setRootController:(id)controller {}
+- (id)rootController { return nil; }
+- (void)setParentController:(id)controller {}
+- (id)parentController { return nil; }
+- (void)setBundle:(NSBundle *)bundle {}
+- (NSBundle *)bundle { return [NSBundle bundleForClass:self.class]; }
 - (void)setPreferenceValue:(id)value specifier:(id)specifier {}
 - (id)readPreferenceValue:(id)specifier { return nil; }
+- (void)reloadSpecifiers { [self.tableView reloadData]; }
+- (void)reload { [self.tableView reloadData]; }
+- (void)showController:(id)controller {}
+- (void)pushController:(id)controller {}
+- (void)popController {}
+- (void)setCells:(id)cells {}
+- (id)cells { return nil; }
+- (void)setProperty:(id)value forKey:(NSString *)key {}
+- (id)propertyForKey:(NSString *)key { return nil; }
+- (void)setPreferenceValue:(id)value specifier:(id)specifier animated:(BOOL)animated {}
+- (void)setPreferenceValue:(id)value specifier:(id)specifier postNotification:(BOOL)post {}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -170,7 +188,7 @@ typedef NS_ENUM(NSInteger, PHRowType) {
     PHRow *respring = [PHRow row:PHRowButton title:@"注销 SpringBoard" key:nil];
     respring.action = @"respring";
 
-    PHRow *about = [PHRow row:PHRowInfo title:@"Porthole 0.1.2 — 舷窗" key:nil];
+    PHRow *about = [PHRow row:PHRowInfo title:@"Porthole 0.1.3 — 舷窗" key:nil];
 
     self.sectionTitles = @[@"舷窗", @"窗口", @"托管方式", @"调试", @"关于"];
     self.sections = @[@[enabled, dock, target, edge, shadow],
