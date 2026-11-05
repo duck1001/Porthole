@@ -1,0 +1,7 @@
+#!/bin/sh
+mkdir -p /var/mobile/Library/Porthole
+chmod 777 /var/mobile/Library/Porthole
+touch /var/mobile/Library/Porthole/porthole.log
+chmod 666 /var/mobile/Library/Porthole/porthole.log
+killall -9 SpringBoard 2>/dev/null || true
+exit 0

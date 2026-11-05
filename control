@@ -6,4 +6,4 @@ Description: 舷窗 — 把 App 装进可拖动、可缩放的浮动窗口。
 Maintainer: duck1001
 Author: duck1001
 Section: Tweaks
-Depends: mobilesubstrate, firmware (>= 15.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0)
