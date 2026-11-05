@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly, nullable) id app;
 @property (nonatomic, copy, readonly) NSString *bundleID;
 @property (nonatomic, copy, readonly) NSString *strategyName;
+@property (nonatomic, copy, readonly) NSString *lastError;
 @property (nonatomic, assign) BOOL verbose;
 
 + (instancetype)hostForBundle:(NSString *)bundleID strategy:(NSInteger)strategy;

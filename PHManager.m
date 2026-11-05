@@ -122,7 +122,7 @@
         tip.textAlignment = NSTextAlignmentCenter;
         tip.textColor = [UIColor colorWithWhite:0.75 alpha:1.0];
         tip.font = [UIFont systemFontOfSize:12];
-        tip.text = @"场景托管失败\n把目标 App 启动到前台后重试\n详情见设置里的黑匣子日志";
+        tip.text = [NSString stringWithFormat:@"场景托管失败\n%@\n把目标 App 启动到前台后重试\n详情见设置里的黑匣子日志", self.host.lastError ?: @"未知原因"];
         [self.window.contentContainer addSubview:tip];
     }
 }

@@ -15,11 +15,28 @@
 @property (nonatomic, strong) id sceneView;
 @property (nonatomic, copy)   NSString *bundleID;
 @property (nonatomic, copy)   NSString *strategyName;
+@property (nonatomic, copy)   NSString *lastError;
 @property (nonatomic, assign) NSInteger strategy;
 @property (nonatomic, assign) BOOL started;
 @end
 
 @implementation PHSceneHost
+
++ (void)probeEnvironment {
+    NSArray *classes = @[@"SBApplicationController", @"SBApplication", @"SBApplicationSceneView",
+                         @"SBSceneView", @"FBScene", @"FBSceneManager", @"FBSceneWorkspace",
+                         @"UIScenePresentationManager", @"_UISceneHostingView", @"UISceneHostingView",
+                         @"FBSSceneSettings", @"UIMutableApplicationSceneSettings"];
+    for (NSString *n in classes) {
+        PHLog(@"探测: class %@ = %@", n, NSClassFromString(n) ? @"有" : @"无");
+    }
+    id scene = nil;
+    NSArray *scenes = @[@"uiPresentationManager", @"settings", @"updateSettings:withTransitionContext:completion:",
+                        @"activateWithTransitionContext:", @"invalidate", @"clientProcess"];
+    for (NSString *sel in scenes) {
+        PHLog(@"探测: FBScene %@ = %d", sel, (int)[scene respondsToSelector:NSSelectorFromString(sel)]);
+    }
+}
 
 + (instancetype)hostForBundle:(NSString *)bundleID strategy:(NSInteger)strategy {
     PHSceneHost *h = [PHSceneHost new];
@@ -35,12 +52,16 @@
     Class ctrlCls = NSClassFromString(@"SBApplicationController");
     id ctrl = PHCall0(ctrlCls, @"sharedInstance");
     if (!ctrl) {
+        self.lastError = @"SBApplicationController 不可用";
         PHLog(@"场景: SBApplicationController 不可用");
         return nil;
     }
     id app = PHCall1(ctrl, @"applicationWithBundleIdentifier:", self.bundleID);
     if (!app) app = PHCall1(ctrl, @"applicationWithBundleID:", self.bundleID);
-    if (!app) PHLog(@"场景: 找不到运行中的 App %@（先把它启动到前台）", self.bundleID);
+    if (!app) {
+        self.lastError = [NSString stringWithFormat:@"找不到运行中的 %@", self.bundleID];
+        PHLog(@"场景: 找不到运行中的 App %@（先把它启动到前台）", self.bundleID);
+    }
     return app;
 }
 
@@ -63,18 +84,21 @@
 - (UIView *)viewByPresenter {
     id pm = PHCall0(self.scene, @"uiPresentationManager");
     if (!pm) {
+        self.lastError = @"scene 没有 uiPresentationManager";
         PHLog(@"呈现器: scene.uiPresentationManager 不存在");
         return nil;
     }
     id presenter = PHCall1Int(pm, @"createPresenterWithIdentifier:priority:", @"Porthole", 0);
     if (!presenter) presenter = PHCall1(pm, @"createPresenterWithIdentifier:", @"Porthole");
     if (!presenter) {
+        self.lastError = @"createPresenter 失败";
         PHLog(@"呈现器: createPresenter 失败");
         return nil;
     }
     PHVoid0(presenter, @"activate");
     UIView *v = PHCall0(presenter, @"presentationView");
     if (!v) {
+        self.lastError = @"presentationView 为空";
         PHLog(@"呈现器: presentationView 为空");
         return nil;
     }
@@ -87,6 +111,7 @@
 - (UIView *)viewBySceneView {
     Class cls = NSClassFromString(@"SBApplicationSceneView") ?: NSClassFromString(@"SBSceneView");
     if (!cls) {
+        self.lastError = @"没有 SBApplicationSceneView / SBSceneView";
         PHLog(@"场景视图: 找不到 SBApplicationSceneView / SBSceneView");
         return nil;
     }
@@ -97,6 +122,7 @@
         v = ((id (*)(id, SEL, id))objc_msgSend)([cls alloc], NSSelectorFromString(@"initWithScene:"), self.scene);
     }
     if (!v) {
+        self.lastError = [NSString stringWithFormat:@"%@ 初始化失败", NSStringFromClass(cls)];
         PHLog(@"场景视图: %@ 初始化失败", NSStringFromClass(cls));
         return nil;
     }
@@ -125,6 +151,7 @@
             return v;
         }
     }
+    self.lastError = @"没有可用的宿主视图类";
     PHLog(@"宿主视图: 候选类全部不可用");
     return nil;
 }
@@ -134,6 +161,7 @@
 - (BOOL)start {
     if (self.started) return YES;
     PHLog(@"—— 打开舷窗: %@ ——", self.bundleID);
+    if (self.verbose) [PHSceneHost probeEnvironment];
 
     self.app = [self findApplication];
     if (!self.app) return NO;
@@ -157,6 +185,7 @@
         if (v) break;
     }
     if (!v) {
+        self.lastError = @"三条托管路径都失败";
         PHLog(@"场景: 三条路径都失败");
         return NO;
     }

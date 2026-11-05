@@ -124,7 +124,7 @@
     [a addObject:[self buttonRow:@"重启 SpringBoard" action:@selector(respring)]];
 
     [a addObject:[self group:@"关于"]];
-    [a addObject:[self staticRow:@"Porthole 0.1.0 — 舷窗"]];
+    [a addObject:[self staticRow:@"Porthole 0.1.1 — 舷窗"]];
 
     _built = a;
     return _built;
