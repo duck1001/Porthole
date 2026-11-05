@@ -120,7 +120,6 @@ typedef NS_ENUM(NSInteger, PHRowType) {
 - (void)setPreferenceValue:(id)value specifier:(id)specifier {}
 - (id)readPreferenceValue:(id)specifier { return nil; }
 - (void)reloadSpecifiers { [self.tableView reloadData]; }
-- (void)reload { [self.tableView reloadData]; }
 - (void)showController:(id)controller {}
 - (void)pushController:(id)controller {}
 - (void)popController {}
