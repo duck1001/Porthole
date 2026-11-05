@@ -28,6 +28,9 @@ jobs:
           git sparse-checkout set iPhoneOS16.5.sdk
           mv iPhoneOS16.5.sdk "$THEOS/sdks/"
 
+      - name: Install ldid
+        run: brew install ldid
+
       - name: Build roothide package
         run: |
           set -e
