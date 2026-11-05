@@ -4,11 +4,6 @@
 
 #import "PHAppListController.h"
 
-static id PHCall(id o, NSString *sel, id arg) {
-    if (!o || ![o respondsToSelector:NSSelectorFromString(sel)]) return nil;
-    return ((id (*)(id, SEL, id))objc_msgSend)(o, NSSelectorFromString(sel), arg);
-}
-
 static id PHCall0(id o, NSString *sel) {
     if (!o || ![o respondsToSelector:NSSelectorFromString(sel)]) return nil;
     return ((id (*)(id, SEL))objc_msgSend)(o, NSSelectorFromString(sel));
