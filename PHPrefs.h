@@ -23,6 +23,7 @@ extern NSString *const PHPrefsChangedNotification;
 @property (nonatomic, assign, readonly) NSInteger windowLevel;   // 0 普通 1 高 2 最高
 
 + (instancetype)shared;
++ (void)setValue:(id)value forKey:(NSString *)key;
 - (void)reload;
 @end
 

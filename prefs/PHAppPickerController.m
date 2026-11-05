@@ -1,8 +1,10 @@
 //
-//  PHAppListController.m
+//  PHAppPickerController.m
+//  纯 UIKit 应用列表
 //
 
-#import "PHAppListController.h"
+#import "PHAppPickerController.h"
+#import "PHPreferences.h"
 
 static id PHCall0(id o, NSString *sel) {
     if (!o || ![o respondsToSelector:NSSelectorFromString(sel)]) return nil;
@@ -19,7 +21,6 @@ static NSArray<NSDictionary *> *PHInstalledApps(void) {
     for (id proxy in all) {
         NSString *bid = PHCall0(proxy, @"bundleIdentifier");
         if (!bid.length || [seen containsObject:bid]) continue;
-        // 系统 App 太多，只保留设置里常用的那个特例
         if ([bid hasPrefix:@"com.apple."] && ![bid isEqualToString:@"com.apple.mobilesafari"]) continue;
         NSString *name = PHCall0(proxy, @"localizedName") ?: bid;
         [seen addObject:bid];
@@ -61,34 +62,40 @@ static NSArray<NSDictionary *> *PHInstalledApps(void) {
     return out;
 }
 
-@implementation PHAppListController {
-    NSArray *_built;
+@interface PHAppPickerController ()
+@property (nonatomic, strong) NSArray<NSDictionary *> *apps;
+@end
+
+@implementation PHAppPickerController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"目标应用";
+    self.apps = PHInstalledApps();
+    self.tableView.rowHeight = 46;
 }
 
-- (NSArray *)specifiers {
-    if (_built) return _built;
-    NSMutableArray *a = [NSMutableArray array];
-    [a addObject:[PSSpecifier groupSpecifierWithName:@"选择目标应用（需先启动到前台）"]];
-
-    NSString *current = PHGetValue(@"targetBundle") ?: @"com.apple.mobilesafari";
-    for (NSDictionary *app in PHInstalledApps()) {
-        BOOL sel = [app[@"bundle"] isEqualToString:current];
-        NSString *title = sel ? [NSString stringWithFormat:@"✓ %@", app[@"name"]] : app[@"name"];
-        PSSpecifier *s = [PSSpecifier preferenceSpecifierNamed:title
-                                                        target:self
-                                                           set:nil get:nil detail:nil
-                                                          cell:PSButtonCell edit:nil];
-        [s setProperty:app[@"bundle"] forKey:@"bundle"];
-        [s setButtonAction:@selector(choose:)];
-        [a addObject:s];
-    }
-    _built = a;
-    return _built;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.apps.count;
 }
 
-- (void)choose:(PSSpecifier *)sender {
-    NSString *bundle = [sender propertyForKey:@"bundle"];
-    if (bundle.length) PHSetValue(@"targetBundle", bundle);
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"a"];
+    if (!cell) cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"a"];
+    NSDictionary *app = self.apps[indexPath.row];
+    cell.textLabel.text = app[@"name"];
+    cell.detailTextLabel.text = app[@"bundle"];
+    cell.detailTextLabel.font = [UIFont systemFontOfSize:11];
+    cell.detailTextLabel.textColor = UIColor.secondaryLabelColor;
+    BOOL sel = [app[@"bundle"] isEqualToString:PHTargetBundle()];
+    cell.accessoryType = sel ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NSDictionary *app = self.apps[indexPath.row];
+    PHSetValue(@"targetBundle", app[@"bundle"]);
     [self.navigationController popViewControllerAnimated:YES];
 }
 

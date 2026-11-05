@@ -2,7 +2,10 @@
 //  PHChoiceController.h
 //
 
-#import "PHPreferences.h"
+#import <UIKit/UIKit.h>
 
-@interface PHChoiceController : PSListController
+@interface PHChoiceController : UITableViewController
+- (instancetype)initWithTitle:(NSString *)title
+                          key:(NSString *)key
+                      options:(NSArray<NSDictionary *> *)options;
 @end

@@ -5,10 +5,9 @@ THEOS_PACKAGE_SCHEME = roothide
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = PortholePrefs
-PortholePrefs_FILES = PHPrefsRootListController.m PHChoiceController.m PHAppListController.m PHLogController.m
+PortholePrefs_FILES = PHPrefsRootController.m PHChoiceController.m PHAppPickerController.m PHLogViewController.m
 PortholePrefs_INSTALL_PATH = /Library/PreferenceBundles
-PortholePrefs_CFLAGS = -fobjc-arc -I.. -Wno-deprecated-declarations -Wno-unused-function
+PortholePrefs_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-function
 PortholePrefs_FRAMEWORKS = UIKit Foundation
-PortholePrefs_LDFLAGS = -undefined dynamic_lookup
 
 include $(THEOS_MAKE_PATH)/bundle.mk

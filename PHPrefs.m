@@ -16,6 +16,18 @@ static id PHPrefValue(NSString *key) {
 
 @implementation PHPrefs
 
++ (void)setValue:(id)value forKey:(NSString *)key {
+    CFPreferencesSetValue((__bridge CFStringRef)key,
+                          (__bridge CFPropertyListRef)value,
+                          (__bridge CFStringRef)PH_DOMAIN,
+                          kCFPreferencesCurrentUser,
+                          kCFPreferencesAnyHost);
+    CFPreferencesAppSynchronize((__bridge CFStringRef)PH_DOMAIN);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
+                                         (__bridge CFStringRef)PHPrefsChangedNotification,
+                                         NULL, NULL, true);
+}
+
 + (instancetype)shared {
     static PHPrefs *inst;
     static dispatch_once_t once;

@@ -26,6 +26,7 @@ static const CGFloat PHDockInset = 2.0;
     self = scene ? [super initWithWindowScene:scene] : [super initWithFrame:UIScreen.mainScreen.bounds];
     if (self) {
         self.backgroundColor = UIColor.clearColor;
+        self.alpha = 0.72;
         self.windowLevel = UIWindowLevelAlert - 2;
         self.rootViewController = [UIViewController new];
         self.rootViewController.view.backgroundColor = UIColor.clearColor;

@@ -144,7 +144,9 @@
 
 - (void)phDockDidLongPress:(PHDock *)dock {
     [self closeWindowIfNeeded];
-    PHLog(@"把手长按: 关闭浮窗");
+    [PHPrefs setValue:@NO forKey:@"showDock"];
+    [dock hide];
+    PHLog(@"把手长按: 收起把手（showDock=NO）");
 }
 
 #pragma mark - PHWindowDelegate
